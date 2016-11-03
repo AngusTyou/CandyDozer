@@ -6,15 +6,21 @@ public class ShooterController : MonoBehaviour {
 	const int SphereCandyFrequency = 3;
 
 	int sampleCandyCount;
+	AudioSource shotSound;
 
 	public GameObject[] candyPrefabs;
 	public GameObject[]	candySquarePrefabs;
-	public GameObject chandyHolder;
+	public CandyHolder candyHolder;	
 
 	public float shotSpeed;
 	public float shotTorque;
 	public float baseWidth;
-	
+
+
+	void Start() {
+		shotSound = GetComponent<AudioSource> ();
+	}
+
 	// Update is called once per frame
 	void Update () {
 	
@@ -52,6 +58,10 @@ public class ShooterController : MonoBehaviour {
 
 	public void Shot() {
 
+		// キャンディを生成できる条件外ならShotしない
+		if (candyHolder.GetCandyAmount () <= 0)
+			return;
+
 		// オブジェクト生成
 		GameObject candy = 
 			(GameObject)Instantiate (              
@@ -59,13 +69,16 @@ public class ShooterController : MonoBehaviour {
 				GetInstantiatePosition(),
 			    Quaternion.identity);
 	
-		candy.transform.parent = chandyHolder.transform;	
+		candy.transform.parent = candyHolder.transform;	
 	
 		// 力とトルクの加算
 		Rigidbody candyRigidbody = candy.GetComponent<Rigidbody> ();
 		candyRigidbody.AddForce (transform.forward * shotSpeed);
 		candyRigidbody.AddTorque (new Vector3(0, shotTorque, 0));
 	
+		candyHolder.ConsumeCandy ();
+
+		shotSound.Play ();	
 	
 	}
 }
